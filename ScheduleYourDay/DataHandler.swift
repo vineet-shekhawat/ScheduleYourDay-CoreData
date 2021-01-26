@@ -27,7 +27,7 @@ final class DataHandler {
     
     var sections = ["Morning", "Afternoon", "Evening"]
     
-    var favTask = ["Task1, task2"]
+    var favTask = ["Task1", "Task2", "Task3", "Task4"]
     
     private init() {
         //init
