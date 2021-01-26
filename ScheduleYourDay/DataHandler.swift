@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 enum taskTimeline: Int {
     case morning
@@ -13,9 +14,11 @@ enum taskTimeline: Int {
     case evening
 }
 
-final class DataHandler {
+final class DataHandler: NSObject {
     
     static let shared = DataHandler()
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     var morningTask = ["coffee", "workout"]
     var afternoonTask = ["lunch", "meeting"]
@@ -27,9 +30,21 @@ final class DataHandler {
     
     var sections = ["Morning", "Afternoon", "Evening"]
     
-    var favTask = ["Task1", "Task2", "Task3", "Task4"]
+    var favTask: [FavTask]?
     
-    private init() {
-        //init
+    private override init() {
+        super.init()
+        self.fetchFavTask()
     }
+    
+    func fetchFavTask() -> Bool {
+        do {
+            self.favTask = try self.context.fetch(FavTask.fetchRequest())
+            return true
+        } catch {
+            print("error while fetching Favourite tasks")
+            return false
+        }
+    }
+    
 }

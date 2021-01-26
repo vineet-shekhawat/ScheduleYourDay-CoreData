@@ -126,7 +126,7 @@ class NextDayViewController: UIViewController, UITableViewDelegate, UITableViewD
 extension NextDayViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return model.favTask.count
+        return self.model.favTask?.count ?? 0
     }
 
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -134,17 +134,20 @@ extension NextDayViewController: UIPickerViewDelegate, UIPickerViewDataSource {
     }
 
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return model.favTask[row]
+        return self.model.favTask?[row].task
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         if let index = self.currentIndex {
             if index.section == taskTimeline.morning.rawValue {
-                model.nextMorningTask[index.row] = model.favTask[row]
+                guard let task = self.model.favTask?[row].task else { return }
+                model.nextMorningTask[index.row] = task
             } else if index.section == taskTimeline.afternoon.rawValue {
-                model.nextAfternoonTask[index.row] = model.favTask[row]
+                guard let task = self.model.favTask?[row].task else { return }
+                model.nextAfternoonTask[index.row] = task
             } else {
-                model.nextEveTask[index.row] = model.favTask[row]
+                guard let task = self.model.favTask?[row].task else { return }
+                model.nextEveTask[index.row] = task
             }
             self.pickerView.isHidden = true
             self.tableView.reloadRows(at: [index], with: .none)

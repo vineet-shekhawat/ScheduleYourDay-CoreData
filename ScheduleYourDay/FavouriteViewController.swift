@@ -19,22 +19,36 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         self.tableView.allowsSelection = false
     }
     
+    func fetchFavTask() {
+        if self.model.fetchFavTask() {
+            DispatchQueue.main.async {
+                self.tableView.reloadData()
+            }
+        }
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return model.favTask.count
+        return self.model.favTask?.count ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as? FavouriteAddCell else {
             return UITableViewCell(style: .default, reuseIdentifier: "cell")
         }
-        cell.textLabel?.text = model.favTask[indexPath.row]
+        cell.textLabel?.text = self.model.favTask?[indexPath.row].task
         return cell
     }
     
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if(editingStyle == .delete) {
-            model.favTask.remove(at: indexPath.row)
-            self.tableView.reloadData()
+            guard let taskRemove = self.model.favTask?[indexPath.row] else { return }
+            self.model.context.delete(taskRemove)
+            do {
+                try self.model.context.save()
+            } catch {
+                print("delete and save causes error")
+            }
+            self.fetchFavTask()
         }
     }
     
@@ -63,8 +77,16 @@ class FavouriteViewController: UIViewController, UITableViewDelegate, UITableVie
         let save = UIAlertAction(title: "Save", style: .default) { (alert) in
             let textfield = alertController.textFields?[0].text
             if let text = textfield {
-                self.model.favTask.append(text)
-                self.tableView.reloadData()
+                let newTask = FavTask(context: DataHandler.shared.context)
+                newTask.task = text
+                
+                do {
+                    try self.model.context.save()
+                }
+                catch {
+                    print("Saving favTask Failed")
+                }
+                self.fetchFavTask()
             }
         }
         let cancel = UIAlertAction(title: "Cancel", style: .default, handler: nil)
